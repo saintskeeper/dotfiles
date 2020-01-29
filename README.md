@@ -1,4 +1,4 @@
-#H1  Current  Dotfiles 
+# H1  Current  Dotfiles 
 These files are compatible with both linux and macos.
 
 Enjoy. 
