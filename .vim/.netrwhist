@@ -1,7 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =5
-let g:netrw_dirhist_1='/Users/wday/VirtualEnv/venv/code-for-review/Infra/VDC/Prod/roles/nsx'
-let g:netrw_dirhist_2='/usr/local/etc/bash_completion.d'
-let g:netrw_dirhist_3='/Users/wday/Downloads/cli/charts/portal-appliance'
-let g:netrw_dirhist_4='/Users/wday/Git/openshift-infra/inventories/dev07/group_vars/OSEv3'
-let g:netrw_dirhist_5='/Users/wday/Git/vsphere-infrastructure/autoLibrary/rcsDepo/inventory/vault_pass'

@@ -10,7 +10,7 @@
 #		du $arg -- "$@";
 #	else
 #		du $arg .[^.]* ./*;
-#	f; 
+#	f;
 #}
 
 
@@ -64,3 +64,12 @@ qawk(){
     awk '{print $1}'
 }
 
+###############
+# Git Functoins
+###############
+
+git-picker(){
+    # 1= the branch to dechkout
+    # 2 = the folder to pull into the branch
+    git checkout $1 -- $2
+}
