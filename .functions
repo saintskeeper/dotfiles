@@ -73,3 +73,6 @@ git-picker(){
     # 2 = the folder to pull into the branch
     git checkout $1 -- $2
 }
+updatectx(){
+for cluster in "$(tkg get clusters | grep -v STATUS)"; do  echo "$cluster" | awk '{ print "tkg get credentials "$1" -n "$2}' | sh ; done
+}
