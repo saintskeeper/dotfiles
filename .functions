@@ -76,3 +76,22 @@ git-picker(){
 updatectx(){
 for cluster in "$(tkg get clusters | grep -v STATUS)"; do  echo "$cluster" | awk '{ print "tkg get credentials "$1" -n "$2}' | sh ; done
 }
+
+
+rmns(){
+    # where does kubectl proxy go?
+    kubectl proxy &
+    for i in `k get ns  | grep Terminating| awk '{print $1}'`;
+    do
+        NAMESPACE=$i;
+        # add new line to echo
+        echo
+        echo "\nDeleting $NAMESPACE";
+        kubectl get ns $NAMESPACE -o json | jq '.spec = {"finalizers":[]}'| jq '.metadata.finalizers = []' > temp.json;
+        curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize
+
+    done
+    echo
+    echo 'reattaching kubectl proxy'
+    fg
+}
