@@ -3,5 +3,4 @@
 .bash_prompt
 .bashrc
 .functions
-.git
 .profile
