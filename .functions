@@ -69,7 +69,7 @@ qawk(){
 ###############
 
 git-picker(){
-    # 1= the branch to dechkout
+    # 1= the branch to chechkout
     # 2 = the folder to pull into the branch
     git checkout $1 -- $2
 }
@@ -94,4 +94,8 @@ rmns(){
     echo
     echo 'reattaching kubectl proxy'
     fg
+}
+
+func gitaddall(){
+
 }
