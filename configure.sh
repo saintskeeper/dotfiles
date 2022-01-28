@@ -12,4 +12,4 @@ unamestr=$(uname)
 
 if [[ "$unamestr" == 'Darwin' ]]; then
 	echo "export PATH=/opt/homebrew/bin:$PATH" >> ~/.bash_profile && source ~/.bash_profile
-fib
+fi
