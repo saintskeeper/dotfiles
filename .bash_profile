@@ -11,7 +11,19 @@ unset file;
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob;
 
+# HISTORY 
 # Append to the Bash history file, rather than overwriting it
+export HISTSIZE=10000
+export HISTFILESIZE=2000000
+export HISTCONTROL=ignoreboth
+export HISTTIMEFORMAT='%F %T '
+export HISTIGNORE='ls:ll:ls -alh:pwd:clear:history'
+
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+# Multiple commands on one line show up as a single line
+shopt -s cmdhist
+
 shopt -s histappend;
 
 # Autocorrect typos in path names when using `cd`
@@ -51,3 +63,11 @@ if [ -f '/Users/wday/Downloads/google-cloud-sdk/path.bash.inc' ]; then . '/Users
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/wday/Downloads/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/wday/Downloads/google-cloud-sdk/completion.bash.inc'; fi
+
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+
+### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
+export PATH="/Users/walter/.rd/bin:$PATH"
+### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)# bash completion for tkn                                  -*- shell-script -*-
+unset PROMPT_COMMAND

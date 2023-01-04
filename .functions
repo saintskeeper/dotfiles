@@ -68,6 +68,10 @@ qawk(){
 # Git Functoins
 ###############
 
+git-add-all(){
+    git add -A
+}
+
 git-picker(){
     # 1= the branch to chechkout
     # 2 = the folder to pull into the branch
@@ -86,7 +90,7 @@ rmns(){
         NAMESPACE=$i;
         # add new line to echo
         echo
-        echo "\nDeleting $NAMESPACE";
+        echo "\n Deleting $NAMESPACE";
         kubectl get ns $NAMESPACE -o json | jq '.spec = {"finalizers":[]}'| jq '.metadata.finalizers = []' > temp.json;
         curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize
 
@@ -96,3 +100,120 @@ rmns(){
     fg
 }
 
+
+konfig(){
+k konfig import -s $1
+}
+
+
+
+##################
+###AWS PROFILES###
+##################
+prep_aws_eks()  {
+    unset AWS_PROFILE
+    export REGION_STAKED=some-region
+    export AWS_PROFILE=some-aws-profile
+    kx my-eks-cluster
+}
+
+
+
+
+########################
+# Grep stuff 
+########################
+grep-all(){
+grep -rnw  . -e $1
+}
+
+
+#########################
+# Docer Mac Stuff 
+#########################A
+linux-run(){
+docker run --rm -it -v $(pwd):/tmp busybox $1 $2
+}
+
+
+# Tar 
+
+simple-tar(){
+    #1 = archive name 
+    #2 = folder
+    tar -cvf $1  -C $2
+}
+
+kustomize-auto-generate(){
+BASEDIR=$(pwd)
+for i in  `ll -d ./*  | awk  '{print $9}' | cut -c 3-`
+do
+cd $BASEDIR/$i && kustomize create --autodetect;
+done
+cd $BASEDIR
+
+}
+
+kustomize-auto-delete(){
+BASEDIR=$(pwd)
+for i in  `ll -d ./*  | awk  '{print $9}' | cut -c 3-`
+do
+cd $BASEDIR/$i && rm kustomization.yaml;
+done
+cd $BASEDIR
+}
+#Function to port forward tekton dashboard 
+
+# tekton functions 
+tkplist() {
+ tkn pipelinerun list | head 
+}
+
+tkplog(){
+    tkn pipelinerun logs -f
+}
+
+tekton-dashboard(){
+    kubectl port-forward -n tekton-pipelines service/tekton-dashboard 9097:9097
+}
+
+gs(){
+git status
+}
+
+
+kps(){
+    kubectl get pods --sort-by=.status.startTime
+ }
+
+import-ecr(){
+    cat import.txt  | awk -F '[][]' '{print $2}' |  sed  '/^$/d' >loop.txt
+    for i in $(cat loop.txt); do
+    echo  importing $i
+    terraform import module.ecr.aws_ecr_repository.default $i
+    done
+}
+
+stream-import-ecr(){
+    terraform plan > /tmp/foo3
+    grep created /tmp/foo3 | grep module.ecr.aws_ecr_repository |awk -F '["]' '{print "terraform import \047module.ecr.aws_ecr_repository.default[\""$2"\"]\047", $2}' >/tmp/foo.sh
+    cat /tmp/foo.sh 
+    bash /tmp/foo.sh
+}
+
+
+kaniko-build(){
+    docker run \
+    -v $(pwd):/workspace \
+    gcr.io/kaniko-project/executor:latest \
+    --dockerfile=/workspace/Dockerfile \
+    --context=/workspace \
+    --no-push
+}
+
+##################
+# Core Dirs      #
+##################
+devdir () {
+    cd ~/Git/Dev/$1
+}
