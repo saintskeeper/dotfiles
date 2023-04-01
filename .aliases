@@ -56,6 +56,15 @@ alias week='date +%V'
 
 alias apl="ansible-playbook"
 alias agl="ansible-galaxy"
+alias vim="nvim"
+#################
+#  Virtual Envs #
+#################
+
+# env for Reinforcement learning class
+alias RLenv=". ReinforcementLearning/bin/activate"
+
+
 
 
 #################
@@ -66,6 +75,8 @@ alias k='kubectl'
 alias kn='kubens'
 alias kd='kubectl describe'
 alias kg='kubectl get'
+alias kdel='kubectl delete'
+alias kapl='kubectl apply'
 
 
 
@@ -73,9 +84,14 @@ alias kg='kubectl get'
 #################
 #    Flux   #
 #################
+alias f='flux'
+alias fgh='flux get helmrelease'
 alias fgk='flux get kustomization'
 alias fgs='flux get source git'
-alias frk='flux reconcile kustomization'
+alias frek='flux reconcile kustomization'
+alias freh='flux reconcile helmrelease'
 alias frsg='flux reconcile source git'
-
-
+alias fsk='flux suspend kustomization'
+alias frk='flux resume kustomization'
+alias fsh='flux suspend helmrelease'
+alias frh='flux resume helmrelease'

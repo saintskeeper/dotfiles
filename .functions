@@ -1,19 +1,11 @@
 #!/usr/bin/env bash
 
-#function fs() {
-#	if du -b /dev/null > /dev/null 2>&1; then
-#		local arg=-sbh;
-#	else
-#		local arg=-sh;
-#	fi
-#	if [[ -n "$@" ]]; then
-#		du $arg -- "$@";
-#	else
-#		du $arg .[^.]* ./*;
-#	f;
-#}
 
-
+rapid-kube-apply(){
+    awk '/^---$/{filename = sprintf("resourceTemp-%02d.yaml", ++i); next} {print > filename}' $1
+    ls resourceTemp-* | xargs -I{} -P10 kubectl apply -f {}
+    rm resourceTemp-*
+}
 
 function linuxls(){
 # List all files colorized in long format
@@ -67,8 +59,14 @@ qawk(){
 ###############
 # Git Functoins
 ###############
+gb(){
+    git branch $1
+}
+gp(){
+    git pull
+}
 
-git-add-all(){
+gaddall(){
     git add -A
 }
 
@@ -77,10 +75,30 @@ git-picker(){
     # 2 = the folder to pull into the branch
     git checkout $1 -- $2
 }
+
+gs(){
+git status
+}
+gcm(){
+    git commit -m "$1"
+}
+
+git-branches-delete(){
+    for i in $(git branch | grep -v stage | grep -v prod)
+    do
+        git branch -d $i
+    done
+}
+git-branch-force-delete(){
+    for i in $(git branch | grep -v stage | grep -v prod)
+    do
+        git branch -df $i
+    done
+}
+
 updatectx(){
 for cluster in "$(tkg get clusters | grep -v STATUS)"; do  echo "$cluster" | awk '{ print "tkg get credentials "$1" -n "$2}' | sh ; done
 }
-
 
 rmns(){
     # where does kubectl proxy go?
@@ -106,16 +124,6 @@ k konfig import -s $1
 }
 
 
-
-##################
-###AWS PROFILES###
-##################
-prep_aws_eks()  {
-    unset AWS_PROFILE
-    export REGION_STAKED=some-region
-    export AWS_PROFILE=some-aws-profile
-    kx my-eks-cluster
-}
 
 
 
@@ -164,7 +172,16 @@ cd $BASEDIR
 }
 #Function to port forward tekton dashboard 
 
-# tekton functions 
+
+
+kps(){
+    kubectl get pods --sort-by=.status.startTime
+ }
+
+ ###########
+ # TKN Stuff
+ ###########
+
 tkplist() {
  tkn pipelinerun list | head 
 }
@@ -172,19 +189,19 @@ tkplist() {
 tkplog(){
     tkn pipelinerun logs -f
 }
+tkrerun(){
+    tkn pipeline start $1 --use-pipelinerun $2
+}
 
 tekton-dashboard(){
     kubectl port-forward -n tekton-pipelines service/tekton-dashboard 9097:9097
 }
 
-gs(){
-git status
+tekton-rerun(){
+    tkn pipeline start $1 --use-pipelinerun $2
 }
 
 
-kps(){
-    kubectl get pods --sort-by=.status.startTime
- }
 
 import-ecr(){
     cat import.txt  | awk -F '[][]' '{print $2}' |  sed  '/^$/d' >loop.txt
@@ -199,6 +216,7 @@ stream-import-ecr(){
     grep created /tmp/foo3 | grep module.ecr.aws_ecr_repository |awk -F '["]' '{print "terraform import \047module.ecr.aws_ecr_repository.default[\""$2"\"]\047", $2}' >/tmp/foo.sh
     cat /tmp/foo.sh 
     bash /tmp/foo.sh
+    # example  terraform import module.ecr.aws_ecr_repository.default[\"blockchain/oasis/node-dev\"] blockchain/oasis/node-dev
 }
 
 
@@ -210,10 +228,136 @@ kaniko-build(){
     --context=/workspace \
     --no-push
 }
+#aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 443004199236.dkr.ecr.us-west-2.amazonaws.com
+# docker pull  443004199236.dkr.ecr.us-west-2.amazonaws.com/utilities/signing-container:0.4.5
+
+
+
+
 
 ##################
-# Core Dirs      #
+# Consul Stuff   #
 ##################
-devdir () {
-    cd ~/Git/Dev/$1
+
+consul-new-ui-export(){
+    kubectl port-forward -n consul service/hashicorp-consul-consul-ui 9999:80
+}
+console-log-check(){
+    # gets name of every service 
+for i in $(cat consul.export | grep reg | awk -F '["/]' '{print $4"/"$5"/"$6"/"$7}'| sort -u)
+do
+# grap the import from  service, find things that match the service then get entire value
+for j in $(grep $i   consul.export  | awk -F '["]' '{print $4}')
+do
+echo $service 
+# grep on $j grabbing 3rd line and decoding timer 
+echo $j ; grep $j  consul.export -A 3 | grep value | awk -F '"' '{print $4}' | base64 --decode| awk -F '.' '{print $1}' ; echo ""
+# then check against time 
+# https://www.unixtimestamp.com/
+if [ $(grep $j  consul.export -A 3 | grep value | awk -F '"' '{print $4}' | base64 --decode| awk -F '.' '{print $1}') -lt 1674229461 ]
+then
+echo $i >> temp.$$
+fi
+done
+done
+
+cat temp.$$ | uniq -c
+
+}
+consul-export(){
+    # CONSUL_HTTP_ADDR=10.34.0.10:8500
+    consul kv export -datacenter=dc1 > consul-staging.export
+}
+
+fix-trackpad(){
+    killall Dock    
+}
+
+# Vault 
+vault-forward(){
+nohup kubectl -n vault port-forward svc/vault 8200 > /dev/null 2>&1& 
+}
+vault-kill-forward(){
+    pkill -f port-forward
+}
+vault-login(){
+    export VAULT_ADDR=http://127.0.0.1:8200
+    if [ -z "$1" ]
+    then
+    echo "No token provided"
+    fi
+    vault login $1
+}
+
+consul-export(){
+export CONSUL_HTTP_ADDR=http://10.45.0.10:8500
+consul kv export
+consul kv export > ~/consul.export    
+}
+
+
+consul-find-key(){
+for i in $(cat consul.export | grep master | awk -F '["/]' '{print $4"/"$5"/"$6"/"$7}'| sort -u)
+do
+for j in $(grep $i   consul.export  | awk -F '["]' '{print $4}')
+do
+echo $j ; grep $j  consul.export -A 3 | grep value | awk -F '"' '{print $4}' | base64 --decode| awk -F '.' '{print $1}' ; echo ""
+done
+done
+}
+
+# Terraform testing 
+
+tf-local-test(){
+    rm -r .terraform
+    rm .terraform.lock.hcl
+    terraform init -backend=false 
+    terraform validate
+    #terraform plan -refresh=false
+}
+
+
+# Kyvenro 
+
+kyvenro-failed-policies(){
+    # $1 = polr name 
+    # $2 = namespace    
+    kubectl get polr $1 -n $2 -o jsonpath='{.results[?(@.result=="fail")]}' | yq -p json -
+}
+
+consul-gossip-export(){
+    export GossipKey=$(kubectl get secret consul-gossip-key -n vault -o json | jq -r '.data["gossip-key"]'| base64 --decode)
+}
+
+drain-node(){
+    kubectl drain $1 --ignore-daemonsets --delete-emptydir-data 
+}
+
+verify-gpg(){
+    gpg --verify $1
+}
+
+verify-gpg-git-head(){
+    git cat-file commit HEAD | sed -e'/^gpgsig/d; /^ /d' >commit
+    git cat-file commit HEAD | sed -ne'/^gpgsig/,/---END/s/^[a-z]* //p' >sig
+    gpg --verify sig commit
+}
+
+verify-gpg-git-sha(){
+    git cat-file commit $1 | sed -e'/^gpgsig/d; /^ /d' >commit
+    git cat-file commit $1 | sed -ne'/^gpgsig/,/---END/s/^[a-z]* //p' >sig
+    gpg --verify sig commit
+}
+
+
+sign_repo(){
+    GIT_KEY=$(git config --get user.signingKey)
+    rm checklists/checksum.txt.gpg
+    validate_checkfile checklists/checklog.txt 
+    gpg --local-user $GIT_KEY --sign  $1 # file to sign 
+    echo "repo signed successfully"
+}
+
+clean-vscode(){
+    killall Electron
 }
