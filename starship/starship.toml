@@ -1,0 +1,47 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+# Character customization
+[character]
+success_symbol = '[➜](bold blue)'
+error_symbol = '[✘](bold red)'
+
+# Kubernetes configuration
+[kubernetes]
+format = '[⛵ $context \($namespace\) ]($style)'
+style = 'bold #FFA500' # Using hex code for true orange
+disabled = false
+detect_files = []
+detect_extensions = []
+
+# AWS Configuration (since I see you're using cloud)
+[aws]
+format = 'on [$symbol($profile )(\($region\) )]($style)'
+style = 'bold yellow'
+symbol = '️⚡️'
+
+# Git configuration (since I see you're using master branch)
+[git_branch]
+format = 'on [$symbol$branch]($style) '
+style = 'bold purple'
+
+[git_status]
+format = '[\[$all_status$ahead_behind\]]($style) '
+style = 'bold red'
+
+# Disable package module as requested
+[package]
+disabled = true
+
+# Directory
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+format = '[📁 $path]($style)'
+
+[gcloud]
+disabled = true

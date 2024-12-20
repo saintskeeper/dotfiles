@@ -1,10 +1,17 @@
-# H1  Current  Dotfiles
-These files are compatible with both linux and macos.
+# Current  Dotfiles
+My current setup + or minus a Tokyo midnight theme.
 
-Enjoy.
 
+## OPTIONAL make your own template
+- you can use this repo as a base for creating your own configs
+- you can also import `.config/iterm-config.json` if you'd like
 
 ### Install
-1. Clone the repository
-2. run ./configure.sh
-3. enjoy
+```
+git clone git@github.com:saintskeeper/dotfiles.git
+cd dotfiles
+source scripts/bootstrap.sh
+move_dotfiles
+```
+
+Gl hf 🚀

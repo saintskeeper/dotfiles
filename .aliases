@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-#################
-#  Source Files #
-#################
-wmday=`whoami`
-export wmday
-
-
-
 
 #################
 #command aliases#
