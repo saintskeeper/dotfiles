@@ -45,7 +45,6 @@ done;
 ##############
 #Shell Config#
 ##############
-xset r on
 set -o vi
 
 export PATH="/usr/local/opt/openssl/bin:$PATH"
