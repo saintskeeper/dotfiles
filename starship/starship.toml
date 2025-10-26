@@ -11,6 +11,9 @@ error_symbol = '[✘](bold #dc322f)'    # Solarized Red
 
 # Kubernetes configuration
 [kubernetes]
+contexts = [
+  { context_pattern = "my fun arn, context_alias = "my-fun-alias" }
+]
 format = '[⛵ $context \($namespace\) ]($style)'
 style = 'bold #cb4b16'  # Solarized Orange
 disabled = false
@@ -45,3 +48,13 @@ format = '[📁 $path ]($style)'
 
 [gcloud]
 disabled = true
+
+[custom.active_worktree]
+symbol = "🌳 "
+command = """
+worktree_path=$(git rev-parse --show-toplevel 2>/dev/null)
+main_worktree=$(git rev-parse --git-dir 2>/dev/null | xargs dirname)
+if [ "$worktree_path" != "$main_worktree" ]; then
+  basename "$worktree_path"
+fi
+"""
